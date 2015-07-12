@@ -1,0 +1,15 @@
+body { 
+  font-family: Helvetica, Arial, sans-serif;
+  background: #eeede9;
+}
+.branch {
+  background: #efefef;
+  padding: 0.5em;
+  border-bottom: 1px solid #444;
+}
+.branch span {
+  display: block;
+}
+.branch-name {
+  font-size: 1.2em;
+}
