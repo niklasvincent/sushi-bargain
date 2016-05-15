@@ -5,8 +5,18 @@ The geolocation is done entirely in Javascript using HTML5 Geolocation. Since th
 
 It also means you do not need any process running on the server, you can simply serve the HTML/CSS/JS/JSON and the browser will perform all the work required.
 
+## How to run
+
+### Install dependencies
+
+    virtualenv venv
+    . ./venv/bin/activate
+    pip install -r requirements.txt
+
+### Generate data file
+
 To generate the `web/sushi-data.json` file required by the web application, simply run:
 
     python generate.py
-    
+
 Afterwards, simply deploy the entirety of `web/` to e.g. Amazon S3.

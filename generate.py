@@ -1,11 +1,9 @@
-import hashlib
 import json
 import logging
 import os
 import re
 import sys
 import traceback
-import urllib
 import zipfile
 
 from collections import namedtuple
@@ -13,33 +11,7 @@ from StringIO import StringIO
 
 from bs4 import BeautifulSoup
 
-
-class Cache(object):
-  """Inspired by <https://stackoverflow.com/questions/148853/caching-in-urllib2>"""
-
-  cacheDirectory = 'cache'
-
-  def __init__(self, fun):
-    self.fun = fun
-    self.cacheDirectory = os.path.join(
-      os.path.dirname(os.path.realpath(__file__)),
-      self.cacheDirectory
-    )
-
-  def __call__(self, *args, **kwargs):
-    key  = hashlib.md5(str(args[-1])).hexdigest()
-    cacheFileName = os.path.join(self.cacheDirectory, key)
-    logging.debug("Cache key is %s, cache filename is %s", key, cacheFileName)
-    if os.path.exists(cacheFileName):
-      logging.debug("Cache hit for key %s", key)
-      with open(cacheFileName, 'r') as f:
-        data = f.read()
-    else:
-      logging.debug("Cache miss for key %s", key)
-      data = self.fun(*args, **kwargs)
-      with open(cacheFileName, 'w') as f:
-        f.write(data)
-    return data
+from lib.Cache import Cache
 
 
 class Address(object):
@@ -71,10 +43,11 @@ class Address(object):
 class GeoLocator(object):
 
 
-  def __init__(self, databaseUrl = "http://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip"):
+  def __init__(self, databaseUrl):
     self.databaseUrl = databaseUrl
-    self.database = json.loads(self._constructDatabase(self, self.databaseUrl))
-
+    self.cache = Cache()
+    data = self._constructDatabase(self.databaseUrl)
+    self.database = json.load(data)
 
   def __constructLookUpTable(self, data):
     """Construct a look up table between post codes and coordinates"""
@@ -82,29 +55,32 @@ class GeoLocator(object):
     for line in data[1:]:
       try:
         l = [i.strip() for i in line.split(',')]
-        table[l[1]] = (float(l[2]), float(l[3]))
+        table[l[1].replace(' ', '')] = (float(l[2]), float(l[3]))
       except Exception as e:
         logging.error("Could not construct look up record for line: %s", line)
     return table
 
 
-  @Cache
   def _constructDatabase(self, url):
     """Fetch database file from URL and construct look up table"""
-    logging.debug("Fetching postcode to coordinate database from URL %s", url)
-    filename = url.split('/')[-1].replace('.zip', '.csv')
-    r = urllib.urlopen(url)
-    compressedData = StringIO()
-    compressedData.write(r.read())
-    compressedArchive = zipfile.ZipFile(compressedData)
-    databaseFile = compressedArchive.open(filename)
-    data = databaseFile.readlines()
-    return json.dumps(self.__constructLookUpTable(data))
+    cacheKey = "post_code_lookup_db"
+    data = self.cache["post_code_lookup_db"]
+    if not data:
+      logging.debug("Fetching postcode to coordinate database from URL %s", url)
+      filename = url.split('/')[-1].replace('.zip', '.csv')
+      compressedArchive = zipfile.ZipFile(self.cache[url])
+      databaseFile = compressedArchive.open(filename)
+      content = json.dumps(self.__constructLookUpTable(databaseFile.readlines()))
+      self.cache["post_code_lookup_db"] = content
+      data = StringIO()
+      data.write(content)
+    return data
 
 
   def coordinatesForPostCode(self, postCode):
     """Get coordinates for a UK post code"""
-    return self.database.get(postCode, (0.0, 0.0))
+    coordinates = self.database.get(postCode, (0.0, 0.0))
+    return coordinates
 
 
 ItsuBranch = namedtuple("ItsuBranch", ["name", "address", "postCode", "weekday", "saturday", "sunday"])
@@ -115,18 +91,17 @@ class ItsuWebsite(object):
   def __init__(self, baseDomain = "https://www.itsu.com"):
     self.baseDomain = baseDomain
     self.timeRegexp = re.compile(r"[0-9]{1,2}:[0-9]{1,2}")
+    self.cache = Cache()
 
 
   def _buildUrl(self, relativeUrl):
     return self.baseDomain + relativeUrl
 
 
-  @Cache
   def _fetchHTML(self, url):
     """Fetch HTML from URL"""
     logging.debug("Fetching HTML for URL %s", url)
-    f = urllib.urlopen(url)
-    html = f.read()
+    html = self.cache[url].read()
     return html
 
 
@@ -142,7 +117,8 @@ class ItsuWebsite(object):
     """Get the URL of all Itsu shops"""
     logging.debug("Getting list of all Itsu shops")
     locationsUrl = self._buildUrl("/locations/shops/")
-    return [self._buildUrl(link['href']) for link in self._parseHTML(locationsUrl).select("#shoplist-name a")]
+    shopUrls = [self._buildUrl(link['href']) for link in self._parseHTML(locationsUrl).select("#shoplist-name a")]
+    return shopUrls
 
 
   def _getHalfPriceTimesForShop(self, shopUrl):
@@ -202,7 +178,13 @@ def constructGeographicalData(itsuBranches, geoLocator):
       )
   return geographicalData
 
-def main(outputFilename = "web/sushi-data.json"):
+def main(configFile):
+  # Parse config file
+  try:
+    with open(configFile) as f:
+      config = json.load(f)
+  except Exception as e:
+    logger.error("Could not load configuration file %s: %s", configFile, e)
   # Set up logging
   root = logging.getLogger()
   ch = logging.StreamHandler(sys.stdout)
@@ -213,15 +195,16 @@ def main(outputFilename = "web/sushi-data.json"):
   ch.setLevel(logging.DEBUG)
   root.setLevel(logging.DEBUG)
 
-  geoLocator = GeoLocator()
+  geoLocator = GeoLocator(config["post_code_db_url"])
 
   itsu = ItsuWebsite()
   itsuBranches = itsu.getHalfPriceTimes()
 
+  outputFilename = config["output_filename"]
   logging.debug("Writing generated data to %s", outputFilename)
   with open(outputFilename, 'w') as f:
     f.write(json.dumps(constructGeographicalData(itsuBranches, geoLocator)))
 
 
 if __name__ == "__main__":
-  main()
+  main(configFile = "config.json")
