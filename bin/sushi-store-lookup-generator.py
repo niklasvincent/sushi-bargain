@@ -24,7 +24,14 @@ def populate_positions_for_branches(post_code_lookup_table, itsu_branches):
     """Populates the latitude/longitude of each branch using the provided lookup table"""
     itsu_branches_with_position = []
     for i, itsu_branch in enumerate(itsu_branches):
-        itsu_branches_with_position.append(itsu_branch._replace(position=post_code_lookup_table.get(itsu_branch.post_code)))
+        position = post_code_lookup_table.get(itsu_branch.post_code, Position(0.0, 0.0))
+        itsu_branches_with_position.append({
+            "position": {"lat": position.latitude, "lng": position.longitude},
+            "name": itsu_branch.name,
+            "post_code" : itsu_branch.post_code,
+            "address" : itsu_branch.address,
+            "half_price_times": [itsu_branch.sunday] + 5 * [itsu_branch.weekday] + [itsu_branch.saturday]
+        })
     return itsu_branches_with_position
 
 def deserialise_post_code_lookup_table(postcode_database_filename):
