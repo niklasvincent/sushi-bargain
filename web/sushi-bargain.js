@@ -58,7 +58,7 @@ function addBranchToList(branch) {
   var branchHtml = '<div class="branch"><span class="branch-name">' + branch.name + '</span>';
   branchHtml += '<span class="branch-time-until">' + timeUntilHalfPrice + '</span>'
   branchHtml += '<span class="branch-distance">' + Math.round(branch.distance, 2) + ' km</span>';
-  branchHtml += '<span class="branch-address"><a href="' + addressLink(branch) + '">' + branch.address + ', ' + branch.postCode + '</a></span>';
+  branchHtml += '<span class="branch-address"><a href="' + addressLink(branch) + '">' + branch.address + ', ' + branch.post_code + '</a></span>';
   branchHtml += '</div>';
   var branchesHtml = document.getElementById('branches').innerHTML;
   document.getElementById('branches').innerHTML = branchesHtml + branchHtml;
@@ -75,10 +75,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
     var currentLng = pos.coords.longitude;
     getResource("sushi-data.json", function(data) {
       data = JSON.parse(data);
+      console.log(data);
       for (var i = 0; i < data.length; i++) {
         var e = data[i];
-        if (e.halfPriceTimes[currentDay] != null) {
-          e.timeUntilHalfPrice = e.halfPriceTimes[currentDay] - currentTime;
+        if (e.half_price_times[currentDay] != null) {
+          e.timeUntilHalfPrice = e.half_price_times[currentDay] - currentTime;
           if (e.timeUntilHalfPrice >= -0.5) {
             e.distance = distance(currentLng, currentLat, e.position.lng, e.position.lat);
             if (e.distance <= distanceLimit) {
