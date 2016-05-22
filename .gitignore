@@ -1,1 +1,7 @@
+postcodes.p
+web_cache.sqlite
+venv
 web/sushi-data.json
+.idea
+*.pyc
+sushi-bargain.iml
