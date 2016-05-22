@@ -5,6 +5,22 @@ The geolocation is done entirely in Javascript using HTML5 Geolocation. Since th
 
 It also means you do not need any process running on the server, you can simply serve the HTML/CSS/JS/JSON and the browser will perform all the work required.
 
+## Structure
+
+There are two components:
+
+### `post-code-lookup-generator.py`
+
+1. Download a compressed CSV file of UK postcodes and their corresponding latitude/longitude
+2. Unpack the compressed CSV
+3. Constructs a lookup table and serialises it using Python's pickle object serialisation
+
+### `sushi-store-lookup-generator.py`
+
+1. Scrapes the URLs of each individual branch
+2. Extracts key information (name, address, opening hours) from the individual page of each branch
+3. Deserialises the UK postcodes lookup table and supplements the information about each branch with its longitude/latitude
+
 ## How to run
 
 ### Install dependencies
