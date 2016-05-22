@@ -5,9 +5,9 @@ The geolocation is done entirely in Javascript using HTML5 Geolocation. Since th
 
 It also means you do not need any process running on the server, you can simply serve the HTML/CSS/JS/JSON and the browser will perform all the work required.
 
-## How to run
+## How to run
 
-### Install dependencies
+### Install dependencies
 
     virtualenv venv
     . ./venv/bin/activate
@@ -33,8 +33,19 @@ It will take a couple of minutes to download and build the lookup table for post
 
 ### Generate data file
 
-To generate the `web/sushi-data.json` file required by the web application, simply run:
+To generate the `web/sushi-data.json` file required by the web application, simply use `make`:
 
-    python generate.py
+    make shops
 
-Afterwards, simply deploy the entirety of `web/` to e.g. Amazon S3.
+or directly:
+
+    ./bin/sushi-store-lookup-generator.py --postcode-database=postcodes.p --output-directory=./web
+
+It will initially do a big number of HTTP requests, which will be cached for an hour:
+
+    2016-05-22 15:47:24,077 - root - INFO - Trying to deserialise post code lookup table from postcodes.p
+    2016-05-22 15:47:48,153 - root - INFO - Wrote final JSON data to ./web/sushi-data.json
+
+### Deploying
+
+Simply deploy the entirety of `web/` to e.g. Amazon S3.
