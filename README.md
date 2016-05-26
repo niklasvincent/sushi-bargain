@@ -1,13 +1,13 @@
+[![Build Status](https://travis-ci.org/nlindblad/sushi-bargain.svg?branch=master)](https://travis-ci.org/nlindblad/sushi-bargain)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 # sushi-bargain
-Find the closest Itsu that will have a half-price sale the soonest.
+**Problem**: Find the closest Itsu that will have a half-price sale the soonest.
 
-The geolocation is done entirely in Javascript using HTML5 Geolocation. Since the number of nodes is small (< 100), the time required to calculate the distances and sort by distance and time left is short enough to run on mobile devices.
-
-It also means you do not need any process running on the server, you can simply serve the HTML/CSS/JS/JSON and the browser will perform all the work required.
+Generates a JSON data file than can be used by [https://github.com/nlindblad/sushi-bargain-frontend](sushi-bargain-frontend).
 
 ## Structure
 
-There are two components:
+There are three components:
 
 ### `post-code-lookup-generator.py`
 
@@ -21,15 +21,24 @@ There are two components:
 2. Extracts key information (name, address, opening hours) from the individual page of each branch
 3. Deserialises the UK postcodes lookup table and supplements the information about each branch with its longitude/latitude
 
+### `sushi-store-optimised-generator.py`
+
+1. Generate a time slot lookup table for sales times
+2. Generate a [GeoHash](https://en.wikipedia.org/wiki/Geohash) lookup table for stores
+
 ## How to run
 
 ### Install dependencies
 
-    virtualenv venv
-    . ./venv/bin/activate
-    pip install -r requirements.txt
+    make install
 
-### Generate post code lookup table
+### Generate data file
+
+    make all
+
+### Generate data files in steps
+
+#### Generate post code lookup table
 
 Either through `make`:
 
@@ -47,9 +56,9 @@ It will take a couple of minutes to download and build the lookup table for post
     2016-05-22 13:37:51,648 - root - INFO - Attempting to decompress ukpostcodes.csv from within ukpostcodes.zip
     2016-05-22 13:38:09,501 - root - INFO - Wrote serialied lookup table to ./postcodes.p
 
-### Generate data file
+#### Generate data file
 
-To generate the `web/sushi-data.json` file required by the web application, simply use `make`:
+To generate the `web/sushi-data.json` file, simply use `make`:
 
     make shops
 
@@ -62,6 +71,18 @@ It will initially do a big number of HTTP requests, which will be cached for an 
     2016-05-22 15:47:24,077 - root - INFO - Trying to deserialise post code lookup table from postcodes.p
     2016-05-22 15:47:48,153 - root - INFO - Wrote final JSON data to ./web/sushi-data.json
 
-### Deploying
 
-Simply deploy the entirety of `web/` to e.g. Amazon S3.
+#### Generate optimised data file
+
+To generate the `web/sushi-data-optimised.json` file required by the [https://github.com/nlindblad/sushi-bargain-frontend](web application), simply use `make`:
+
+    make optimise
+
+or directly:
+
+    ./bin/sushi-store-optimised-generator.py --input-directory=./web --output-directory=./web
+
+It will do a quick augmentation of the data:
+
+    2016-05-28 15:56:48,225 - root - INFO - Deserialised input sushi-data.json
+    2016-05-28 15:56:48,226 - root - INFO - Serialised optimised data to output sushi-data-optimised.json

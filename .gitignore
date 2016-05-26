@@ -2,6 +2,10 @@ postcodes.p
 web_cache.sqlite
 venv
 web/sushi-data.json
+web/sushi-data-optimised.json
+web/node_modules
+public
 .idea
 *.pyc
 sushi-bargain.iml
+web/build
