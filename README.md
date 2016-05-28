@@ -3,7 +3,7 @@
 # sushi-bargain
 **Problem**: Find the closest Itsu that will have a half-price sale the soonest.
 
-Generates a JSON data file than can be used by [https://github.com/nlindblad/sushi-bargain-frontend](sushi-bargain-frontend).
+Generates a JSON data file than can be used by [sushi-bargain-frontend](https://github.com/nlindblad/sushi-bargain-frontend).
 
 ## Structure
 
@@ -74,7 +74,7 @@ It will initially do a big number of HTTP requests, which will be cached for an 
 
 #### Generate optimised data file
 
-To generate the `web/sushi-data-optimised.json` file required by the [https://github.com/nlindblad/sushi-bargain-frontend](web application), simply use `make`:
+To generate the `web/sushi-data-optimised.json` file required by the [web application](https://github.com/nlindblad/sushi-bargain-frontend), simply use `make`:
 
     make optimise
 
