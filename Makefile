@@ -15,13 +15,25 @@ test:
 	    ./tests/test_itsu.py \
 	)
 
+postcodes: SHELL:=/bin/bash
 postcodes: postcodes.p
-	./bin/post-code-lookup-generator.py --database-url https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip --output-directory .
+	( \
+       source ./venv/bin/activate ; \
+       ./bin/post-code-lookup-generator.py --database-url https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip --output-directory . ; \
+	)
 
+shops: SHELL:=/bin/bash
 shops:
-	./bin/sushi-store-lookup-generator.py --postcode-database=postcodes.p --output-directory=./web
+	( \
+				source ./venv/bin/activate ; \
+       ./bin/sushi-store-lookup-generator.py --postcode-database=postcodes.p --output-directory=. ; \
+	)
 
+optimise: SHELL:=/bin/bash
 optimise:
-	./bin/sushi-store-optimised-generator.py --input-directory=./web --output-directory=./web
+	( \
+				source ./venv/bin/activate ; \
+				./bin/sushi-store-optimised-generator.py --input-directory=. --output-directory=. ; \
+	)
 
 all: postcodes shops optimise
