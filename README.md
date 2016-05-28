@@ -86,3 +86,9 @@ It will do a quick augmentation of the data:
 
     2016-05-28 15:56:48,225 - root - INFO - Deserialised input sushi-data.json
     2016-05-28 15:56:48,226 - root - INFO - Serialised optimised data to output sushi-data-optimised.json
+
+## Development
+
+The unit tests are residing in `tests` and can be run via:
+
+    make test
