@@ -5,14 +5,9 @@ import logging
 import os
 import sys
 
-
 from google.protobuf.json_format import MessageToJson
-
-
-sys.path.insert(0, os.path.abspath(os.path.join(*[os.path.realpath(__file__), "..", "..", "sushi-bargain"])))
-import restaurant_data_pb2
-from itsu import *
-from lookup import LookupGenerator
+from sushi_bargain.itsu import ItsuApi
+from sushi_bargain.lookup import LookupGenerator
 
 
 def setup_logging(debug=False):
@@ -55,7 +50,10 @@ def main(output_filename="sushi-data-optimised.json", precision=7):
     itsu_website = ItsuApi()
 
     itsu_branches = itsu_website.get_branches()
-    data = LookupGenerator.build_lookup_data(branches=itsu_branches, precision=precision)
+    data = LookupGenerator.build_lookup_data(
+        branches=itsu_branches,
+        precision=precision
+    )
     json_data = MessageToJson(data)
     with open(output_filename_full, "w") as f:
         f.write(json_data)

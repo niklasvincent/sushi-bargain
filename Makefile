@@ -4,36 +4,10 @@ install: requirements.txt
 	( \
        source ./venv/bin/activate ; \
        pip install -Ur requirements.txt; \
+       python setup.py install; \
     )
 
-test: SHELL:=/bin/bash
-test:
-	( \
-       source ./venv/bin/activate ; \
-	    ./tests/test_postcode.py ; \
-	    ./tests/test_address.py ; \
-	    ./tests/test_itsu.py \
-	)
+test: tox
 
-postcodes: SHELL:=/bin/bash
-postcodes: postcodes.p
-	( \
-       source ./venv/bin/activate ; \
-       ./bin/post-code-lookup-generator.py --database-url https://www.freemaptools.com/download/full-postcodes/ukpostcodes.zip --output-directory . ; \
-	)
-
-shops: SHELL:=/bin/bash
-shops:
-	( \
-				source ./venv/bin/activate ; \
-       ./bin/sushi-store-lookup-generator.py --postcode-database=postcodes.p --output-directory=. ; \
-	)
-
-optimise: SHELL:=/bin/bash
-optimise:
-	( \
-				source ./venv/bin/activate ; \
-				./bin/sushi-store-optimised-generator.py --input-directory=. --output-directory=. ; \
-	)
-
-all: postcodes shops optimise
+protobuf:
+	protoc -I=. --python_out=sushi-bargain restaurant_data.proto

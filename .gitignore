@@ -1,11 +1,17 @@
-postcodes.p
-web_cache.sqlite
-venv
-web/sushi-data.json
-web/sushi-data-optimised.json
-web/node_modules
-public
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
 .idea
 *.pyc
-sushi-bargain.iml
-web/build
+sushi_bargain.egg-info/
+
+# due to using tox and pytest
+.tox
+.cache
+.pytest_cache
