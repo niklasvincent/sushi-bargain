@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+
+message Shops {
+    repeated int32 ids = 1;
+}
+
+message GeoHash {
+    int32 precision = 1;
+    map<string, google.protobuf.ListValue> lookup = 2;
+}
+
+message RestaurantData {
+    repeated google.protobuf.ListValue time_slot_lookup = 1 [json_name="time_slot_lookup"];
+    GeoHash geo_hash = 2 [json_name="geo_hash"];
+    repeated Shop shops = 3;
+}
+
+message Position {
+    float lat = 1;
+    float lng = 2;
+}
+
+message Shop {
+    Position position = 1 [json_name="position"];
+    string post_code = 2 [json_name="post_code"];
+    string name = 3 [json_name="name"];
+    google.protobuf.ListValue half_price_times = 4 [json_name="half_price_times"];
+    string nearest_station = 5 [json_name="nearest_station"];
+}

@@ -1,9 +1,16 @@
-python:
-  - "2.7"
-  - "2.6"
-before_install:
-  - sudo pip install --user virtualenv
+sudo: false
+dist: trusty
+
+language: python
+python: 3.6
+cache: pip
+
+notifications:
+  email: false
+
+language: python
+
 install:
-  - make install
-script:
-  - make test
+  - pip install tox
+
+script: tox
